@@ -105,7 +105,7 @@ async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             db.save_flagged(msg_id, chat_id, result.narrative_label, result.confidence, result.cluster_id)
 
         await update.message.reply_html(
-            format_analyze_result(text, result.is_propaganda, result.confidence, result.narrative_label, result.cluster_id),
+            format_analyze_result(text, result.is_propaganda, result.confidence, result.narrative_label, result.cluster_id, spans=result.spans),
         )
         return
 
@@ -137,6 +137,7 @@ async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     confidence=result.confidence,
                     label=result.narrative_label,
                     cluster_id=result.cluster_id,
+                    spans=result.spans,
                 )
             )
 
@@ -206,5 +207,6 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 confidence=result.confidence,
                 label=result.narrative_label,
                 cluster_id=result.cluster_id,
+                spans=result.spans,
             )
         )

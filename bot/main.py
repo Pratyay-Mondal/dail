@@ -29,6 +29,7 @@ from telegram.ext import (
 )
 
 from storage.db import init_db
+from services.classifier import warmup
 from bot.handlers import (
     start_command,
     help_command,
@@ -61,6 +62,10 @@ def main() -> None:
     # Initialise database
     init_db()
     logger.info("Database ready.")
+
+    # Pre-load HuggingFace model (downloads on first run, cached after)
+    logger.info("Loading propaganda classifier model — please wait…")
+    warmup()
 
     # Build the application
     app = ApplicationBuilder().token(token).build()

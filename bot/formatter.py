@@ -27,7 +27,7 @@ def _conf_bar(confidence: float, length: int = 10) -> str:
 
 # ── Single message alert ──────────────────────────────────────────────────────
 
-def format_flag_alert(text: str, username: str | None, confidence: float, label: str, cluster_id: str | None) -> str:
+def format_flag_alert(text: str, username: str | None, confidence: float, label: str, cluster_id: str | None, spans: list[str] | None = None) -> str:
     """
     Short inline alert posted immediately after a propaganda message is detected
     in watch mode.
@@ -35,13 +35,18 @@ def format_flag_alert(text: str, username: str | None, confidence: float, label:
     user_str = f"@{username}" if username else "unknown user"
     cluster_str = f"  🗂 Cluster: <code>{cluster_id}</code>\n" if cluster_id else ""
     bar = _conf_bar(confidence)
+    spans_str = ""
+    if spans:
+        highlighted = "  |  ".join(f"<b><u>{_trim(s, 40)}</u></b>" for s in spans)
+        spans_str = f"🔍 Flagged spans: {highlighted}\n"
 
     return (
         f"🚨 <b>PROPAGANDA DETECTED</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"👤 From: {user_str}\n"
-        f"🏷 Narrative: <b>{label}</b>\n"
+        f"🏷 Technique: <b>{label}</b>\n"
         f"{cluster_str}"
+        f"{spans_str}"
         f"📊 Confidence: {bar} {confidence:.0%}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"💬 <i>\"{_trim(text, 200)}\"</i>"
@@ -82,17 +87,21 @@ def format_report(rows: list) -> str:
 
 # ── /analyze single text ─────────────────────────────────────────────────────
 
-def format_analyze_result(text: str, is_propaganda: bool, confidence: float, label: str, cluster_id: str | None) -> str:
+def format_analyze_result(text: str, is_propaganda: bool, confidence: float, label: str, cluster_id: str | None, spans: list[str] | None = None) -> str:
     """Result card for an on-demand /analyze <text> check."""
     verdict = "🚨 <b>PROPAGANDA</b>" if is_propaganda else "✅ <b>CLEAN</b>"
     cluster_str = f"\n🗂 Cluster: <code>{cluster_id}</code>" if cluster_id else ""
     bar = _conf_bar(confidence)
+    spans_str = ""
+    if spans:
+        highlighted = "  |  ".join(f"<b><u>{_trim(s, 40)}</u></b>" for s in spans)
+        spans_str = f"\n🔍 Flagged spans: {highlighted}"
 
     return (
         f"{verdict}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🏷 Narrative: <b>{label}</b>{cluster_str}\n"
-        f"📊 Confidence: {bar} {confidence:.0%}\n"
+        f"🏷 Technique: <b>{label}</b>{cluster_str}\n"
+        f"📊 Confidence: {bar} {confidence:.0%}{spans_str}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"📝 Analysed text:\n<i>\"{_trim(text, 300)}\"</i>"
     )
